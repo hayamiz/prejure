@@ -21,7 +21,10 @@
 		   Color/WHITE
 		   (prejure.piclang/with-color
 		     Color/BLACK
-		     (prejure.piclang/draw-line 0 0 1 1)))))]
+		     (let [line
+			   (prejure.piclang/draw-line 0 0 1 1)]
+		       (prejure.piclang/beside
+			line (prejure.piclang/flip-vert line)))))))]
     (do-swing-and-wait
      (let [terminal (prejure/jframe-terminal player)]
        (doto terminal

@@ -86,9 +86,31 @@
       (painter frame g)
       (.setStroke g prev-stroke))))
 
+(defn flip-vert [painter]
+  (fn [frame g]
+    (painter (move-frame (scale-frame frame 1 -1)
+			 (:edge-y frame))
+	     g)))
+
+(defn flip-horiz [painter]
+  (fn [frame g]
+    (painter (move-frame (scale-frame frame 1 -1)
+			 (:edge-x frame))
+	     g)))
+
+(defn beside [painter1 painter2]
+  (fn [frame g]
+    (let [left (scale-frame frame 0.5 1)
+	  right (move-frame left (:edge-x left))]
+      (painter1 left g)
+      (painter2 right g))))
+
 (defn draw-line [x0 y0 x1 y1]
   (fn [frame g]
     (let [coord-map (frame-coord-map frame)
 	  start-pt (coord-map x0 y0)
 	  end-pt (coord-map x1 y1)]
-    (.drawLine g (.x start-pt) (.y start-pt) (.x end-pt) (.y end-pt)))))
+      (println
+       (format "%f %f %f %f"
+	       (.x start-pt) (.y start-pt) (.x end-pt) (.y end-pt)))
+      (.drawLine g (.x start-pt) (.y start-pt) (.x end-pt) (.y end-pt)))))
