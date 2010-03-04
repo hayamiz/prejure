@@ -1,8 +1,10 @@
 
 (require 'prejure)
+(require 'prejure.piclang)
 (use 'clojure.contrib.swing-utils)
 (use 'clojure.contrib.command-line)
 (import '(javax.swing JFrame))
+(import '(java.awt Color))
 
 (defn main* [args]
   (do-swing-and-wait
@@ -14,7 +16,12 @@
 
 (defn main [args]
   (let [player (prejure/make-default-player
-		(list (prejure/pl-drawline 0 0 1 1)))]
+		(list
+		 (prejure.piclang/with-background
+		   Color/WHITE
+		   (prejure.piclang/with-color
+		     Color/BLACK
+		     (prejure.piclang/draw-line 0 0 1 1)))))]
     (do-swing-and-wait
      (let [terminal (prejure/jframe-terminal player)]
        (doto terminal

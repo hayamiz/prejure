@@ -3,6 +3,7 @@
 (ns prejure
   (:use [clojure core]
         [clojure.contrib str-utils java-utils])
+  (:require prejure.piclang)
   (:import (java.awt Graphics Graphics2D
                      Font FontMetrics
                      RenderingHints
@@ -33,9 +34,8 @@
                       (proxy-super paintComponent g)
                       (let [buf @buf
                             g-buf (.createGraphics buf)]
-                        (println @(:current-painter player))
                         (@(:current-painter player)
-                         (Rectangle. 0 0 (.getWidth buf) (.getHeight buf))
+                         (prejure.piclang/make-frame (.getWidth buf) (.getHeight buf))
                          g-buf)
                         (.drawImage g buf 0 0
                                     (.getWidth this) (.getHeight this) this)))
@@ -130,17 +130,6 @@
       (.add panel)
       (.pack))
     frame))
-
-(defn pl-drawline [x0 y0 x1 y1]
-  (fn [rect g]
-    (let [x (.getX rect) y (.getY rect)
-          w (.getWidth rect)
-          h (.getHeight rect)]
-    (.drawLine g
-               (int (+ x (* w x0)))
-               (int (+ y (* h y0)))
-               (int (+ x (* w x1)))
-               (int (+ y (* h y1)))))))
 
 (defn toggle-fullscreen [frame]
   (let [gdev
