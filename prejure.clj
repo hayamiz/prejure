@@ -25,21 +25,26 @@
       getDefaultScreenDevice))
 
 (defn slide-panel [player]
-  (let [buf (ref (BufferedImage. 640 480 BufferedImage/TYPE_4BYTE_ABGR))]
+  (let [buf (ref (BufferedImage. (:width player)
+                                 (:height player)
+                                 BufferedImage/TYPE_4BYTE_ABGR))]
     (proxy [JPanel KeyListener] []
       (getPreferredSize []
                         (let [buf @buf]
                           (Dimension. (.getWidth buf) (.getHeight buf))))
-      (paintComponent [g] ; <label id="code.game-panel.paintComponent"/>
+      (paintComponent [g]
                       (proxy-super paintComponent g)
                       (let [buf @buf
                             g-buf (.createGraphics buf)]
+                        (.setRenderingHint g-buf
+                                           RenderingHints/KEY_TEXT_ANTIALIASING
+                                           RenderingHints/VALUE_TEXT_ANTIALIAS_ON)
                         (@(:current-painter player)
                          (prejure.piclang/make-frame (.getWidth buf) (.getHeight buf))
                          g-buf)
                         (.drawImage g buf 0 0
                                     (.getWidth this) (.getHeight this) this)))
-      (keyPressed [e]       ; <label id="code.game-panel.keyPressed"/>
+      (keyPressed [e]
                   (let [key-ev {:type 'key-event,
                                 :keycode (.getKeyCode e),
                                 :keymodifier (.getModifiers e)}]
@@ -47,7 +52,7 @@
       (keyReleased [e])
       (keyTyped [e]))))
 
-(defn make-default-player [& pages]
+(defn make-player [params & pages]
   (let [event-queue (ConcurrentLinkedQueue.)
         timer-handler
         (proxy [ActionListener] []
@@ -62,7 +67,9 @@
      :current-page (ref (first pages)),
      :current-painter (ref (first (first pages))),
      :timer timer,
-     :send-event (fn [ev] (.add event-queue ev))}
+     :send-event (fn [ev] (.add event-queue ev)),
+     :width (:width params 640),
+     :height (:height params 480)}
   ))
 
 (defn make-jframe-terminal [& rest]

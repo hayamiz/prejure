@@ -2,8 +2,11 @@
 (ns prejure.piclang
   (:use [clojure core]
         [clojure.contrib str-utils java-utils])
-  (import (java.awt Rectangle Graphics Graphics2D Color)
-	  (java.awt.geom Point2D$Double AffineTransform))
+  (:require [prejure.piclang text])
+  (import (java.awt Rectangle Graphics Graphics2D Color Font)
+	  (java.awt.geom Point2D$Double AffineTransform)
+	  (java.awt.font LineBreakMeasurer TextLayout TextAttribute)
+	  (java.text AttributedString))
   )
 
 (defn point [#^Double x #^Double y]
@@ -105,12 +108,29 @@
       (painter1 left g)
       (painter2 right g))))
 
+(defn below [painter1 painter2]
+  (fn [frame g]
+    (let [up (scale-frame frame 1 0.5)
+	  down (move-frame up (:edge-y up))]
+      (painter1 up g)
+      (painter2 down g))))
+
 (defn draw-line [x0 y0 x1 y1]
   (fn [frame g]
     (let [coord-map (frame-coord-map frame)
 	  start-pt (coord-map x0 y0)
 	  end-pt (coord-map x1 y1)]
-      (println
-       (format "%f %f %f %f"
-	       (.x start-pt) (.y start-pt) (.x end-pt) (.y end-pt)))
       (.drawLine g (.x start-pt) (.y start-pt) (.x end-pt) (.y end-pt)))))
+
+(defn draw-wrapped-text [astr]
+  (fn [frame g]
+    (let [coord-map (frame-coord-map frame),
+	  start-pt (coord-map 0 0),
+	  pt (coord-map 1 0), ;; top-right
+	  width (.x pt),
+	  y-pos (.y pt)]
+      (prejure.piclang.text/draw-wrapped-text
+       astr g start-pt width))))
+
+(defn draw-wrapped-plain-text [str]
+  (draw-wrapped-text (AttributedString. str)))

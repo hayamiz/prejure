@@ -1,30 +1,44 @@
 
 (require 'prejure)
-(require 'prejure.piclang)
+(use 'prejure.piclang)
 (use 'clojure.contrib.swing-utils)
 (use 'clojure.contrib.command-line)
 (import '(javax.swing JFrame))
 (import '(java.awt Color))
 
-(defn main* [args]
-  (do-swing-and-wait
-   (let [terminal (prejure/make-jframe-terminal)]
-     (.setDefaultCloseOperation (:frame terminal) JFrame/EXIT_ON_CLOSE)
-     (dosync (ref-set (:painter terminal)
-                      prejure/default-presentation))
-     ((:show terminal)))))
+;;(defn main* [args]
+;;  (do-swing-and-wait
+;;   (let [terminal (prejure/make-jframe-terminal)]
+;;     (.setDefaultCloseOperation (:frame terminal) JFrame/EXIT_ON_CLOSE)
+;;     (dosync (ref-set (:painter terminal)
+;;                      prejure/default-presentation))
+;;     ((:show terminal)))))
 
 (defn main [args]
-  (let [player (prejure/make-default-player
+  (let [player (prejure/make-player
+		{:width 1024, :height 768}
 		(list
-		 (prejure.piclang/with-background
+		 (with-background
 		   Color/WHITE
-		   (prejure.piclang/with-color
+		   (with-color
 		     Color/BLACK
 		     (let [line
-			   (prejure.piclang/draw-line 0 0 1 1)]
-		       (prejure.piclang/beside
-			line (prejure.piclang/flip-vert line)))))))]
+			   (draw-line 0 0 1 1)]
+		       (beside
+			(draw-wrapped-plain-text
+			 (apply str
+				(interpose ". "
+					   (repeat 10 "The quick brown fox jumps over the lazy dog"))))
+			(below
+			 line (flip-vert line))))))
+		 (with-background
+		   Color/WHITE
+		   (with-color
+		     Color/BLACK
+		     (let [line
+			   (draw-line 0 0 1 1)]
+		       (beside
+			line (flip-vert line)))))))]
     (do-swing-and-wait
      (let [terminal (prejure/jframe-terminal player)]
        (doto terminal
