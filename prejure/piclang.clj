@@ -134,3 +134,12 @@
 
 (defn draw-wrapped-plain-text [str]
   (draw-wrapped-text (AttributedString. str)))
+
+(defn draw-fitted-text [astrs]
+  (fn [frame g]
+    (let [coord-map (frame-coord-map frame)]
+      (prejure.piclang.text/draw-fitted-text
+       astrs g (coord-map 0 0) (coord-map 1 1)))))
+
+(defn draw-fitted-plain-text [str]
+  (draw-fitted-text (list (AttributedString. str))))

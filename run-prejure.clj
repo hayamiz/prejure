@@ -15,30 +15,34 @@
 ;;     ((:show terminal)))))
 
 (defn main [args]
-  (let [player (prejure/make-player
-		{:width 1024, :height 768}
-		(list
-		 (with-background
-		   Color/WHITE
-		   (with-color
-		     Color/BLACK
-		     (let [line
-			   (draw-line 0 0 1 1)]
-		       (beside
-			(draw-wrapped-plain-text
-			 (apply str
-				(interpose ". "
-					   (repeat 10 "The quick brown fox jumps over the lazy dog"))))
-			(below
-			 line (flip-vert line))))))
-		 (with-background
-		   Color/WHITE
-		   (with-color
-		     Color/BLACK
-		     (let [line
-			   (draw-line 0 0 1 1)]
-		       (beside
-			line (flip-vert line)))))))]
+  (let [player
+	(prejure/make-player
+	 {:width 800, :height 600}
+	 (list
+	  (with-background
+	    Color/WHITE
+	    (with-color
+	      Color/BLACK
+	      (let [line
+		    (draw-line 0 0 1 1)]
+		(beside
+		 (below
+		  (draw-fitted-plain-text
+		   "Hello world")
+		  (draw-wrapped-plain-text
+		   (apply str
+			  (interpose
+			   ". " (repeat 10 "The quick brown fox jumps over the lazy dog")))))
+		 (below
+		  line (flip-vert line))))))
+	  (with-background
+	    Color/WHITE
+	    (with-color
+	      Color/BLACK
+	      (let [line
+		    (draw-line 0 0 1 1)]
+		(beside
+		 line (flip-vert line)))))))]
     (do-swing-and-wait
      (let [terminal (prejure/jframe-terminal player)]
        (doto terminal
