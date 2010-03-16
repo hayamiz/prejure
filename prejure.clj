@@ -11,7 +11,7 @@
                      Rectangle)
            (java.awt.image BufferedImage)
            (java.awt.font TextLayout)
-           (java.awt.event KeyListener KeyEvent ActionListener)
+           (java.awt.event KeyListener KeyEvent ActionListener ComponentListener)
            (javax.swing JFrame JPanel Timer)
            (java.util.concurrent SynchronousQueue ConcurrentLinkedQueue)))
 
@@ -28,17 +28,21 @@
   (let [buf (ref (BufferedImage. (:width player)
                                  (:height player)
                                  BufferedImage/TYPE_4BYTE_ABGR))]
-    (proxy [JPanel KeyListener] []
+    (proxy [JPanel KeyListener ComponentListener] []
       (getPreferredSize []
                         (let [buf @buf]
                           (Dimension. (.getWidth buf) (.getHeight buf))))
       (paintComponent [g]
                       (proxy-super paintComponent g)
-                      (let [buf @buf
+                      (let [buf @buf,
                             g-buf (.createGraphics buf)]
-                        (.setRenderingHint g-buf
-                                           RenderingHints/KEY_TEXT_ANTIALIASING
-                                           RenderingHints/VALUE_TEXT_ANTIALIAS_ON)
+                        (doto g-buf
+                          (.setRenderingHint
+                           RenderingHints/KEY_ANTIALIASING
+                           RenderingHints/VALUE_ANTIALIAS_ON)
+                          (.setRenderingHint
+                           RenderingHints/KEY_TEXT_ANTIALIASING
+                           RenderingHints/VALUE_TEXT_ANTIALIAS_ON))
                         (@(:current-painter player)
                          (prejure.piclang/make-frame (.getWidth buf) (.getHeight buf))
                          g-buf)
@@ -50,7 +54,18 @@
                                 :keymodifier (.getModifiers e)}]
                     ((:send-event player) key-ev)))
       (keyReleased [e])
-      (keyTyped [e]))))
+      (keyTyped [e])
+      (componentResized [e]
+                        (dosync
+                         (ref-set
+                          buf (BufferedImage. (.getWidth this)
+                                              (.getHeight this)
+                                              BufferedImage/TYPE_4BYTE_ABGR)))
+                        (.repaint this))
+      (componentHidden [e])
+      (componentMoved [e])
+      (componentShown [e])
+      )))
 
 (defn make-player [params & pages]
   (let [event-queue (ConcurrentLinkedQueue.)
@@ -132,7 +147,8 @@
         frame (JFrame. "Prejure: Presentation in Clojure")]
     (doto panel
       (.setFocusable true)
-      (.addKeyListener panel))
+      (.addKeyListener panel)
+      (.addComponentListener panel))
     (doto frame
       (.add panel)
       (.pack))
