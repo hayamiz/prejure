@@ -34,7 +34,18 @@
 			  (interpose
 			   ". " (repeat 10 "The quick brown fox jumps over the lazy dog")))))
 		 (below
-		  line (flip-vert line))))))
+		  (corner-split wave 4)
+		  (below
+		   line (flip-vert line)))))))
+	  (with-background
+	    Color/WHITE
+	    (with-color
+	      Color/BLACK
+	      (let [line
+		    (draw-line 0 0 1 1)]
+		(beside
+		 line (flip-vert line))))))
+	 (list
 	  (with-background
 	    Color/WHITE
 	    (with-color

@@ -122,6 +122,61 @@
 	  end-pt (coord-map x1 y1)]
       (.drawLine g (.x start-pt) (.y start-pt) (.x end-pt) (.y end-pt)))))
 
+(defn draw-poly [close? points]
+  (let [n-points (int (count points))]
+    (fn [frame g]
+      (let [coord-map (frame-coord-map frame)
+	    points (map (fn [[x y]]
+			  (let [pt (coord-map x y)]
+			    (list (int (.x pt)) (int (.y pt)))))
+			points)
+	    x-points (int-array (map first points))
+	    y-points (int-array (map second points))]
+	(if close?
+	  (.drawPolygon g x-points y-points n-points)
+	  (.drawPolyline g x-points y-points n-points))))))
+
+(defn draw-segment [points]
+  (draw-poly false points))
+
+(defn segments->painter [& segments]
+  (let [painters
+	(map draw-segment segments)]
+    (fn [frame g]
+      (doseq [painter painters]
+	(painter frame g)))))
+
+(def wave
+     (segments->painter
+      '((0.0 0.14) (0.16 0.4) (0.28 0.35) (0.42 0.35) (0.35 0.14) (0.42 0.0))
+      '((0.58 0.0) (0.65 0.14) (0.58 0.35) (0.76 0.35) (1.0 0.65))
+      '((1.0 0.86) (0.6 0.54) (0.76 1.0))
+      '((0.58 1.0) (0.5 0.83) (0.42 1.0))
+      '((0.24 1.0) (0.35 0.49) (0.3 0.41) (0.16 0.59) (0.0 0.35))))
+
+(defn split [split1 split2]
+  (fn [painter n]
+    (if (= n 0)
+      painter
+      (let [smaller ((split split1 split2) painter (- n 1))]
+	(split1 painter (split2 smaller smaller))))))
+
+(defn right-split [painter n]
+  ((split beside below) painter n))
+(defn up-split [painter n]
+  ((split below beside) painter n))
+
+(defn corner-split [painter n]
+  (if (= n 0)
+    painter
+    (let [up (up-split painter (- n 1))
+	  right (right-split painter (- n 1))
+	  top-left (beside up up)
+	  bottom-right (below right right)
+	  corner (corner-split painter (- n 1))]
+      (beside (below painter top-left)
+	      (below bottom-right corner)))))
+
 (defn draw-wrapped-text [astr]
   (fn [frame g]
     (let [coord-map (frame-coord-map frame),
