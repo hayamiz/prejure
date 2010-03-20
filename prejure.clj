@@ -9,7 +9,8 @@
                      Font FontMetrics
                      RenderingHints
                      GraphicsEnvironment Color Dimension
-                     Rectangle)
+                     Rectangle
+                     Dialog$ModalExclusionType)
            (java.awt.image BufferedImage)
            (java.awt.font TextLayout)
            (java.awt.event KeyListener KeyEvent ActionListener ComponentListener)
@@ -48,6 +49,7 @@
                 :height (:height params 480)}]
     (let [event-queue (ConcurrentLinkedQueue.)
           timer-hooks (ref ())
+          key-hooks (ref ())
           timer-handler
           (proxy [ActionListener] []
             (actionPerformed [e]
@@ -56,19 +58,21 @@
                                  (println (.toString ev))
                                  (condp = (:type ev)
                                    'key-pressed
-                                   (case (:keycode ev)
-                                         (KeyEvent/VK_ENTER KeyEvent/VK_RIGHT)
-                                         (do
-                                           (player-next-page player)
-                                           (println (:type ev)))
+                                   (do (case (:keycode ev)
+                                             (KeyEvent/VK_ENTER KeyEvent/VK_RIGHT)
+                                             (do
+                                               (player-next-page player)
+                                               (println (:type ev)))
 
-                                         (KeyEvent/VK_BACK_SPACE KeyEvent/VK_LEFT)
-                                         (do
-                                           (player-prev-page player)
-                                           (println (:type ev)))
+                                             (KeyEvent/VK_BACK_SPACE KeyEvent/VK_LEFT)
+                                             (do
+                                               (player-prev-page player)
+                                               (println (:type ev)))
 
-                                         (println "No matching key")
-                                         )))
+                                             (println "No matching key")
+                                             )
+                                       (doseq [hook @key-hooks]
+                                         (hook ev)))))
                                (doseq [hook @timer-hooks]
                                  (hook))
                                )))
@@ -76,7 +80,8 @@
       (.start timer)
       (let [player (assoc player :send-event (fn [ev] (.add event-queue ev)))
             player (assoc player :timer timer)
-            player (assoc player :timer-hooks timer-hooks)]
+            player (assoc player :timer-hooks timer-hooks)
+            player (assoc player :key-hooks key-hooks)]
         player))
   ))
 
@@ -109,14 +114,21 @@
                                RenderingHints/VALUE_TEXT_ANTIALIAS_ON))
                             ((player-current-painter player)
                              (prejure.piclang/make-frame (.getWidth buf) (.getHeight buf))
+                             {}
                              g-buf)
                             (.drawImage g buf 0 0
                                         (.getWidth this) (.getHeight this) this)))
           (keyPressed [e]
-                      (let [key-ev {:type 'key-pressed,
-                                    :keycode (.getKeyCode e),
-                                    :keymodifier (.getModifiers e)}]
-                        ((:send-event player) key-ev)))
+                      (condp = (.getKeyCode e)
+                        KeyEvent/VK_F5
+                        (let [frame (.. this getParent getParent getParent getParent)]
+                          (toggle-fullscreen frame)
+                          (.requestFocus this))
+                        
+                        (let [key-ev {:type 'key-pressed,
+                                      :keycode (.getKeyCode e),
+                                      :keymodifier (.getModifiers e)}]
+                          ((:send-event player) key-ev))))
           (keyReleased [e])
           (keyTyped [e])
           (componentResized [e]
@@ -131,10 +143,10 @@
           (componentShown [e])
           )]
     (dosync
-     (ref-set (:timer-hooks player)
-              (cons (fn []
+     (ref-set (:key-hooks player)
+              (cons (fn [key-event]
                       (.repaint panel))
-                    @(:timer-hooks player))))
+                    @(:key-hooks player))))
     panel
     ))
 
@@ -146,6 +158,7 @@
       (.addKeyListener panel)
       (.addComponentListener panel))
     (doto frame
+      (.setFocusable false)
       (.add panel)
       (.pack))
     frame))
@@ -155,9 +168,17 @@
         (.. GraphicsEnvironment
             getLocalGraphicsEnvironment
             getDefaultScreenDevice)]
+    (.hide frame)
+    (.removeNotify frame)
     (if (.getFullScreenWindow gdev)
-      (.setFullScreenWindow gdev nil)
-      (.setFullScreenWindow gdev frame))))
+      (do
+        (.setUndecorated frame false)
+        (.show frame)
+        (.setFullScreenWindow gdev nil))
+      (do
+        (.setUndecorated frame true)
+        (.show frame)
+        (.setFullScreenWindow gdev frame)))))
 
 (def font (Font/decode "VL Gothic"))
 

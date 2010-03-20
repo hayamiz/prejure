@@ -2,11 +2,23 @@
 (ns prejure.piclang.text
   (:use [clojure core]
         [clojure.contrib str-utils java-utils])
-  (import (java.awt Rectangle Graphics Graphics2D Color Font Shape)
-	  (java.awt.geom Point2D Point2D$Double AffineTransform GeneralPath)
-	  (java.awt.font LineBreakMeasurer TextLayout TextAttribute)
-	  (java.text AttributedString CharacterIterator))
+  (:import (java.awt Rectangle Graphics Graphics2D Color Font Shape)
+	   (java.awt.geom Point2D Point2D$Double AffineTransform GeneralPath)
+	   (java.awt.font LineBreakMeasurer TextLayout TextAttribute)
+	   (java.text AttributedString CharacterIterator))
   )
+
+(defn draw-text [astrs
+		 #^Graphics2D g
+		 #^Point2D start-pt]
+  (let [frc (.getFontRenderContext g)
+	x-pos (.x start-pt)]
+    (let [y-pos (ref (.y start-pt))]
+      (doseq [astr astrs]
+	(let [layout (TextLayout. (.getIterator astr), frc)
+	      new-y-pos (+ @y-pos (* 1.3 (.getAscent layout)))]
+	  (.draw layout g x-pos new-y-pos)
+	  (dosync (ref-set y-pos new-y-pos)))))))
 
 (defn draw-wrapped-text [#^AttributedString s
 			 #^Graphics2D g
@@ -58,9 +70,4 @@
 		  (double (- (.y bounds))))
       (.transform text-shape affine)
       (.fill g text-shape)
-      (let [bounds (.getBounds text-shape)]
-	(.drawRect g (.x bounds) (.y bounds)
-		   (.width bounds) (.height bounds)))
-      (.drawRect g (int (.x top-left)) (int (.y top-left))
-		 (int w) (int h))
       text-shape)))
