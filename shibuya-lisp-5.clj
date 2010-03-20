@@ -273,13 +273,17 @@
 		  (corner-split wave 3)
 		  (below
 		   line (flip-vert line)))))))
+	 (page
+	  (with-title "Prejureの構造"
+	    (draw-fit-image "prejure.png")))
 	 (page (fit "鋭意開発中"))
 	 (page (with-title "実装したい機能"
 		 (t (lines "- アニメーション"
 			   "- PDF出力"
 			   "- DSLの洗練"
 			   "  → とその応用"
-			   "  → ex) スライドサーバ"))))
+			   "  → ex) スライドサーバ"
+			   "- GUI編集"))))
 
 	 (page (fit "閑話休題"))
 
