@@ -1,0 +1,20 @@
+;; -*- mode: clojure -*-
+
+(do
+  (use 'prejure.piclang)
+  (import '(java.awt Color))
+  
+  (list
+   (list
+    (with-background Color/WHITE
+      (with-color Color/BLACK
+	(do-painters
+	 (within-rect [0.05 0.15 0.9 0.8]
+		      (draw-fitted-plain-text "hogehoge")
+		      )))))
+   (list (with-background Color/WHITE
+     (with-color Color/BLACK
+       (do-painters
+	(within-rect [0.05 0.15 0.9 0.8]
+		     (draw-wrapped-plain-text "hogehoge hogehoge hogehoge hogehoge hogehoge hogehoge hogehoge hogehoge hogehoge hogehoge ")
+		     )))))))

@@ -1,6 +1,7 @@
 
 (require 'prejure)
 (use 'prejure.piclang)
+(use 'prejure.gui)
 (use 'clojure.contrib.swing-utils)
 (use 'clojure.contrib.command-line)
 (import '(javax.swing JFrame))
@@ -90,5 +91,9 @@
 	 (.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE)
 	 (.setVisible true))))))
 
+(defn main [args]
+  (do-swing-and-wait
+   (.setVisible prejure.gui/*main-window* true)
+   ))
 
 (main *command-line-args*)

@@ -85,8 +85,6 @@
         player))
   ))
 
-(def *main-frame* (ref nil))
-
 (defn get-gdev []
   (.. GraphicsEnvironment
       getLocalGraphicsEnvironment

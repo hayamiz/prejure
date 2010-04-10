@@ -1,0 +1,448 @@
+;; -*- mode: clojure -*-
+
+(do
+  (use 'prejure.piclang)
+  (import '(java.awt Color))
+  
+  (require 'prejure)
+  (use 'clojure.contrib.str-utils)
+  (use 'prejure.piclang)
+  (import '(javax.swing JFrame))
+  (import '(java.awt Color))
+
+  (def *default-font* "IPA Mona Gothic")
+  (def *default-font* "VL Gothic")
+  
+  (def lisp-lizard
+       (draw-fit-image "lizard.jpg"))
+  
+  (defn page [painter & painters]
+    (let [header
+	  (with-font [*default-font*, 30]
+	    (draw-text "Shibuya.lisp TT#5: Emacs Lispのある生活"))]
+      (list
+       (with-background Color/WHITE
+	 (with-color Color/BLACK
+	   (do-painters
+	    (within-rect [0.1 0.02 0.8 0.06] header)
+	    (with-font [*default-font*, 40]
+	      (within-rect [0.05 0.15 0.9 0.8]
+			   (apply do-painters painter painters)))))))))
+
+  (def wrap draw-wrapped-plain-text)
+  (def fit draw-fitted-plain-text)
+  (def pad with-padding)
+  (def t draw-text)
+  
+  (def hors horizontals)
+  
+  (defn with-title [title body]
+    (if (string? title)
+      (hors [0.2 (pad 0.2 (fit title))]
+	    [*   body])
+      (let [title-size (first title),
+	    title (second title)]
+	(hors [title-size (pad 0.2 (fit title))]
+	      [*   body]))))
+
+  (defn lines [& line-strs]
+    (str-join "\n" line-strs))
+
+  [(page
+    (fit "Emacs Lispのある生活\n \nはやみずゆうと"))
+   (page
+    (t (lines "自己紹介"
+	      "・はやみず ゆうと (早水 悠登)"
+	      "・大学院 入院生活2年目突入間近"
+	      "・活動"
+	      "　→ twittering-mode.el"
+	      "　→ tokyo-emacs"
+	      "　→ λTシャツ"
+	      "　→ λかわいいよλ"
+	      "　→ 新宿某所でCLバイト"
+	      )))
+   (page
+    (with-title "おことわり"
+      (fit "突っ込み歓迎")))
+   (page
+    (with-title "おことわり その2"
+      (t (lines "さいきんSSDにしました"))))
+   (page
+    (with-title "おことわり その2"
+      (t (lines "さいきんSSDにしました"
+		"→ 時々フリーズします"))))
+   (page
+    (fit "さて"))
+   (page
+    (with-title "Lisp"
+      lisp-lizard))
+   (page
+    (fit "といえば"))
+   (page
+    (with-title "Emacs Lisp"
+      (draw-fit-image "gnu.png")))
+   (page
+    (fit "ですが"))
+   (page
+    (horizontals [0.2 (pad 0.2 (fit "経緯"))]
+		 [* (draw-fit-image "higepon.png")]))
+   (page
+    (fit "というわけで"))
+   (page
+    (fit (lines "今日は"
+		"Emacs Lispの話を")))
+   (page
+    (below
+     (fit (lines "しません"))
+     (fit (lines "最近Clojureのほうが楽しいので、、、"
+		 "みんなClojureの話しすぎだし、、、"))))
+   (page
+    (with-title "最近書いてないし、、、"
+      (draw-fit-image "github.png")))
+   (page
+    (fit "というわけで"))
+   (page
+    (fit "Clojureの話をします"))
+   (page
+    (fit (lines "というのもさすがにアレなので"
+		"まずはEmacs Lispのお話を")))
+   (page
+    (wrap "Emacs Lispで話す内容が無いわけじゃないんだけど、co-routine欲しいねーとかネットワーク通信遅いとか地味な話だったり愚痴になること必死なので。"))
+   (page
+    (fit (lines "\"Emacs Lispのある生活\""
+		"ということで"
+		"生活に密着したネタを")))
+   (page
+    (hors [0.2 (pad 0.2 (fit "会場に質問"))]
+	  [* (fit "Emacsユーザー? or not?")]))
+   (page
+    (hors [0.2 (pad 0.2 (fit "会場に質問"))]
+	  [* (fit "auto-save-buffers 知ってる?")]))
+   (page
+    (hors [0.2 (pad 0.2 (fit "会場に質問"))]
+	  [* (fit "auto-save-buffers 使ってる?")]))
+   (page
+    (fit (lines "使っていない"
+		"そこのアナタ!")))
+   (page
+    (fit (lines "なぜ使わないのですか?")))
+   (page
+    (with-title "よくある答え"
+      (fit "「勝手に上書きされたら困るし」")))
+   (page
+    (with-title "優等生的な提案"
+      (fit "VCS使えば?")))
+   (page
+    (fit (lines "しかし" "Emacsユーザーは" "とてもlazy")))
+   (page
+    (fit "いつも"))
+   (page
+    (fit "こまめに"))
+   (page
+    (fit "VCSにコミット"))
+   (page
+    (with-title "できるはずがない"
+      (draw-fit-image "dotei.jpg")))
+   (page
+    (with-title "Emacsユーザー的提案"
+      (fit "NILFS使えば?")))
+   (page
+    (fit "NILFS?"))
+   (page
+    (with-title [0.4 (lines "New Implementation of " " Log-structured File System")]
+      (t (lines "Linuxファイルシステムの一実装"
+		"- 書き込み: 差分を記録"
+		"- ファイルシステムレベルでのVCS"
+		"- Linuxカーネルのメインラインに!"))))
+   (page
+    (with-title "Emacs Lispはあんまり関係ないけど"
+      (fit (lines "めでたし" "めでたし"))))
+   (page
+    (fit (lines "では")))
+   (page
+    (fit (lines "本題")))
+   (page
+    (fit "Clojureで"))
+   (page
+    (fit "プレゼンソフトを"))
+   (page
+    (fit "作って"))
+   (page
+    (fit "見えてきたこと"))
+   (page
+    (fit (lines "Clojureで"
+		"プレゼンソフトを"
+		"作って"
+		"見えてきたこと")))
+   (page
+    (with-title "もくじ"
+      (t (lines "- プレゼンテーションソフトPrejure"
+		"  → その動機と思想"
+		"- Prejureを通して見るClojure"))))
+   (page
+    (with-title "Prejure"
+      (fit (lines "Presentation" "with" "Clojure"))))
+   (page
+    (with-title "Prejure"
+      (t (lines "- 図形言語ベースでスライド記述"
+		"- プレゼン記述 = プログラミング"
+		"  → ページ: Clojureの関数"
+		"  → プレゼン: スライド関数のシーケンス"
+		"  → アニメーション: スライド関数の"
+		"                    シーケンス"))))
+   (page (fit "動機"))
+   (page (fit "λかわいいよλ"))
+   (page (fit (lines "プレゼン記述"
+		     "= プログラミング")))
+   (page (fit (lines "プレゼンソフトの作法"
+		     "= DSL")))
+   (page (t (lines "- PowerPoint"
+		   "- KeyNote"
+		   "- MagicPoint"
+		   "- LaTeX (Beamer, ...)"
+		   )))
+   (page (fit "全部DSL"))
+   (page (fit "DSLといえば"))
+   (page (fit "Lisp"))
+   (page (fit "プレゼンを作るとき"))
+   (page (fit (lines "あれもしたい" "これもしたい")))
+   (page (fit "自由度"))
+   (page (with-title "柔軟性"
+	   (draw-fit-image "flex.jpg")))
+   (page (fit (lines "プレゼン用DSLの" "自由度")))
+   (page (fit "低い"))
+   (page (with-title "チューリング完全か?"
+	   (t (lines "- × PowerPoint"
+		     "- × KeyNote"
+		     "- × MagicPoint"
+		     "- (例外) LaTeX (Beamer, ...)"
+		     ))))
+   (page (fit "まてよ、、、"))
+   (page (fit (lines "自由度の高い" "DSL、、、")))
+   (page (fit "Lisp!"))
+   (page
+    (fit "Lisp"))
+   (page
+    (fit "といえば"))
+   (page
+    (with-title "× Emacs Lisp"
+      (fit "○ Clojure")))
+   (page (fit "なので"))
+   (page (fit "Clojureでつくりました"))
+   (page
+    (fit "Lispなので"))
+   (page
+    (fit "もちろん"))
+   (page
+    (fit "図形言語"))
+   (page
+    (with-title "こんなふうに書けます"
+      (t (lines "(page"
+		"  (with-title \"チューリング完全か?\""
+		"   (t (lines \"- × PowerPoint\""
+		"     \"- × KeyNote\""
+		"     \"- × MagicPoint\""
+		"     \"- (例外) LaTeX (Beamer, ...)\""
+		"     ))))"))))
+   (page
+    (fit "もちろん"))
+   (page
+    (fit "皆大好きな"))
+   (page
+    (with-title "アイツだって描けちゃう"
+      (corner-split wave 1)))
+   (page
+    (with-title "アイツだって描けちゃう"
+      (corner-split wave 2)))
+   (page
+    (with-title "アイツだって描けちゃう"
+      (corner-split wave 3)))
+   (page
+    (with-title "アイツだって描けちゃう"
+      (corner-split wave 4)))
+   (page
+    (with-title "アイツだって描けちゃう"
+      (corner-split wave 5)))
+   (page
+    (with-title "アイツだって描けちゃう"
+      (corner-split (draw-fill-image "yad.png") 5)))
+   (page
+    (fit "Clojureなので"))
+   (page
+    (with-title "JVM"
+      (draw-fit-image "duke.png")))
+   (page
+    (fit "Write once, run anywhere"))
+   (page
+    (fit "豊富な(GUI)のAPI群"))
+   (page
+    (with-title "サンプル"
+      (let [line
+	    (draw-line 0 0 1 1)]
+	(beside
+	 (below
+	  (fit "Hello world")
+	  (with-font ["Dialog", 20]
+	    (wrap
+	     (apply str
+		    (interpose
+		     ". " (repeat 5 "The quick brown fox jumps over the lazy dog"))))))
+	 (below
+	  (corner-split wave 3)
+	  (below
+	   line (flip-vert line)))))))
+   (page
+    (with-title "Prejureの構造"
+      (draw-fit-image "prejure.png")))
+   (page (fit "鋭意開発中"))
+   (page (with-title "実装したい機能"
+	   (t (lines "- アニメーション"
+		     "- PDF出力"
+		     "- DSLの洗練"
+		     "  → とその応用"
+		     "  → ex) スライドサーバ"
+		     "- GUI編集"))))
+
+   (page (fit "閑話休題"))
+
+   (page (fit "Prejureを通して見るClojure"))
+   (page
+    (with-title "Prejureを書いてみて"
+      (wrap "Clojureというのは、非常に思想の強い言語")))
+   (page
+    (with-title "Prejureを書いてみて"
+      (wrap "Clojureというのは、非常に思想の強い言語でありつつも、現実的なバランス感覚のある言語")))
+   (page
+    (fit "Clojure = 関数型"))
+   (page
+    (fit (lines "immutable" "善")))
+   (page
+    (fit (lines "mutable" "悪")))
+   (page
+    (fit "mutableこわい!"))
+   (page
+    (fit (lines "mutable(破壊的代入)が"
+		"こわい事例")))
+   (page
+    (fit "とあるスパムメール"))
+   (page
+    (with-font [*default-font*, 16]
+      (t (lines "題名： 主人がFPGAに殺されて1年が過ぎました。"
+		"送信日時： Thu 01/29/2009 10:24:42 JST"
+		" "
+		"いきなりのメール失礼します。"
+		"早水ゆうこ、22歳のラムダ教徒です。"
+		"お互いのニーズに合致しそうだと思い、連絡してみました。"
+		"自分のことを少し語ります。"
+		"昨年の夏、わけあって主人を亡くしました。"
+		"自分は…主人のことを…死ぬまで何も理解していなかったのが"
+		"とても悔やまれます。"
+		"主人は大阪に頻繁に旅行に向っていたのですが、"
+		"それは遊びの為の旅行ではなかったのです。"
+		"収入を得るために、私に内緒であんな危険な破壊的代入をしていたなんて。"
+		"一年が経過して、ようやく主人の死から継続渡しできました。"
+		"ですが、お恥ずかしい話ですが、毎日の孤独な夜に、"
+		"身体の関数適応が止まらなくなる時間も増えてきました。"
+		"主人の残した財産は莫大な額です。"
+		"つまり、謝礼は幾らでも出きますので、"
+		"私のcdrを満たして欲しいのです。"
+		"お返事を頂けましたら、もっと詳しい話をしたいと"
+		"考えています。連絡、待っていますね。"
+		"----"
+		"本テキストは， クリエイティブ・コモンズ・ライセンス の下でライセンスされています。"))))
+   (page
+    (with-title "関数型言語"
+      (wrap "悪のいない楽園へ逃げ込んじゃった系: Haskell")))
+   (page
+    (with-title "(元)関数型言語"
+      (wrap "「もーどっちだっていいじゃんかー」といって無法地帯と化した系: OCaml")))
+   (page
+    (with-title "関数型言語"
+      (wrap "必要悪は認めるが、使う場合には重い足枷となる: Clojure")))
+
+   (page
+    (with-title "Clojureの思想"
+      (t (lines "- immutableは善"
+		"  → できるだけ使ってほしい"
+		"  → 計算負荷が軽い"
+		"- mutableは悪"
+		"  → 並列化の障害"
+		"  → とはいえ時には必要"
+		"  → 計算負荷が重い"
+		"  → 使うのが面倒"
+		))))
+   (page
+    (with-title "Mutableな値の使い方"
+      (t (lines "- \"ref\" によるindirection"
+		"  → 重い"
+		"- 更新するときは dosync"
+		"  → トランザクション"
+		"  → refの値の変更を随時記録"
+		"  → 重い"))))
+   (page
+    (fit (lines "トランザクション" "のおはなし")))
+   (page
+    (fit "実例"))
+   (page
+    (fit "リストの合計"))
+   (page
+    (with-title "破壊的"
+      (t (lines "(defn sum-stm [coll]"
+		"  (let [sum (ref 0)]"
+		"    (doseq [x coll]"
+		"      (dosync (alter sum + x)))"
+		"    @sum))"))))
+   (page
+    (with-title "非破壊的"
+      (t (lines "(defn sum-no-stm [coll]"
+		"  (apply + coll))"
+		))))
+   (page
+    (with-title "性能比較"
+      (draw-fit-image "perf.png")))
+   (page
+    (fit "まとめると"))
+   (page
+    (fit "Clojureの思想"))
+   (page
+    (fit (lines "善" "immutable" "並列化")))
+   (page
+    (fit (lines "悪" "mutable" "並列化の敵")))
+   (page
+    (fit (lines "良いものを使うと" "→速くなる" "→使いたくなる")))
+   (page
+    (fit (lines "悪いものを使うと" "→面倒・遅くなる" "→避けるようになる")))
+   (page
+    (fit (lines "使用者を" "良い方向へ" "自然と導く")))
+   (page
+    (fit (lines "Haskell:" "使用者の" "手足を縛って" "夢の世界へ")))
+   (page
+    (fit (lines "OCaml:" "そもそも字面が(ry")))
+   (page
+    (fit "閑話休題"))
+   (page
+    (fit "Clojure"))
+   (page
+    (fit "書いていて楽しい"))
+   (page
+    (fit "久々のアタリな言語"))
+   (page
+    (fit "オススメです"))
+   (page
+    (with-title "まだ時間があれば、、"
+      (t (lines "- Clojureに関する愚痴とか"))))
+   (page
+    (with-title "愚痴その1"
+      (fit "マクロ書きにくい")))
+   (page
+    (with-title "愚痴その1"
+      (fit "と思ったら勘違いだった")))
+   (page
+    (with-title "愚痴その2"
+      (fit "データ構造が貧弱")))
+   (page
+    (with-title "愚痴その3"
+      (fit "Javaのクラス使いにくい、、、")))
+   (page
+    (fit "おわり"))
+   ])
