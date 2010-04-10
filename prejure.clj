@@ -92,6 +92,15 @@
       getLocalGraphicsEnvironment
       getDefaultScreenDevice))
 
+(defn enable-anti-aliasing [g]
+  (doto g
+    (.setRenderingHint
+     RenderingHints/KEY_ANTIALIASING
+     RenderingHints/VALUE_ANTIALIAS_ON)
+    (.setRenderingHint
+     RenderingHints/KEY_TEXT_ANTIALIASING
+     RenderingHints/VALUE_TEXT_ANTIALIAS_ON)))
+
 (defn slide-panel [player]
   (let [buf (ref (BufferedImage. (:width player)
                                  (:height player)
